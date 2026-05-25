@@ -288,6 +288,144 @@
   .virtual    .add-task button { background: #6b8fa8; }
   .creativo   .add-task button { background: #9e7aaa; }
 
+  /* NOTAS RÁPIDAS DEL DÍA (inline en pestaña Semana) */
+.daynotes-section {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 18px 20px;
+}
+
+.daynotes-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.daynotes-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.daynotes-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 400;
+}
+
+.daynotes-input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.daynotes-input-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.daynotes-input-row input:focus { border-color: var(--gold); }
+.daynotes-input-row input::placeholder { color: var(--muted); font-style: italic; }
+
+.daynotes-input-row button {
+  padding: 8px 14px;
+  border-radius: 4px;
+  border: none;
+  background: var(--gold-light);
+  color: var(--gold);
+  font-size: 16px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.15s;
+}
+
+.daynotes-input-row button:hover { opacity: 0.8; }
+
+.daynote-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.daynote-item:last-child { border-bottom: none; }
+
+.daynote-bullet {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.daynote-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.daynote-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.daynote-time {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.daynote-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.daynote-del:hover { color: #d07070; }
+
+.daynotes-empty {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+  
+  <!-- NOTAS RÁPIDAS DEL DÍA -->
+<div class="daynotes-section">
+  <div class="daynotes-header">
+    <div class="daynotes-dot"></div>
+    <div class="daynotes-title">Notas rápidas del día</div>
+  </div>
+  <div class="daynotes-input-row">
+    <input type="text" id="daynote-input"
+      placeholder="Apunta algo para hoy..."
+      onkeydown="if(event.key==='Enter') addDaynote()">
+    <button onclick="addDaynote()">+</button>
+  </div>
+  <div id="daynotes-list"></div>
+</div>
+  
   /* WEEKEND BANNER */
   .weekend-banner {
     margin-top: 20px;
@@ -1106,8 +1244,60 @@
     renderNotes();
   }
 
+  // ── DAY NOTES ─────────────────────────────────────
+function renderDaynotes() {
+  const list = document.getElementById('daynotes-list');
+  if (!list) return;
+  if (!state.daynotes) state.daynotes = {};
+  const notes = state.daynotes[activeDay] || [];
+  if (notes.length === 0) {
+    list.innerHTML = '<div class="daynotes-empty">Sin notas para hoy.</div>';
+    return;
+  }
+  list.innerHTML = [...notes].reverse().map(n => `
+    <div class="daynote-item">
+      <div class="daynote-bullet"></div>
+      <div class="daynote-content">
+        <div class="daynote-text">${escHtml(n.text)}</div>
+        <div class="daynote-time">${n.time}</div>
+      </div>
+      <button class="daynote-del" onclick="removeDaynote(${n.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function addDaynote() {
+  const input = document.getElementById('daynote-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!state.daynotes) state.daynotes = {};
+  if (!state.daynotes[activeDay]) state.daynotes[activeDay] = [];
+  const now = new Date();
+  const time = now.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
+  state.daynotes[activeDay].push({ id: state.nextId++, text, time });
+  input.value = '';
+  save();
+  renderDaynotes();
+}
+
+function removeDaynote(id) {
+  if (!state.daynotes || !state.daynotes[activeDay]) return;
+  state.daynotes[activeDay] = state.daynotes[activeDay].filter(n => n.id !== id);
+  save();
+  renderDaynotes();
+}
+
   // ── QUICK NOTES ───────────────────────────────────
   function renderQuicknotes() {
+    function render() {
+  renderDaySelector();
+  renderBlocks();
+  renderNotes();
+  renderCapture();
+  renderClosure();
+  renderQuicknotes();
+  renderDaynotes();
+}
     const list = document.getElementById('quicknotes-list');
     const count = document.getElementById('quicknotes-count');
     if (!list) return;
