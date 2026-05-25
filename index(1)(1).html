@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi semana · Planificador</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #151210;
+    --surface: #201c18;
+    --dark: #1e1a16;
+    --gold: #c4a467;
+    --gold-light: #3a2c18;
+    --sage: #7a9e7e;
+    --sage-light: #1a2e1c;
+    --slate: #6b8fa8;
+    --slate-light: #162232;
+    --plum: #9e7aaa;
+    --plum-light: #261830;
+    --text: #e4dcd0;
+    --muted: #8a8078;
+    --border: #332e28;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--dark);
+    padding: 28px 40px 22px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 300;
+    color: #f7f4ef;
+    letter-spacing: -0.5px;
+  }
+
+  .header-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+    font-weight: 400;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+  }
+
+  .tab {
+    padding: 7px 18px;
+    border-radius: 20px;
+    border: 1px solid #3a3530;
+    background: transparent;
+    color: #b0a090;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--dark);
+    font-weight: 500;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 32px 40px 60px;
+  }
+
+  /* DAY SELECTOR */
+  .day-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .day-btn {
+    padding: 8px 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .day-btn.active {
+    background: #2e2820;
+    border-color: var(--gold);
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .day-count {
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: #38322c;
+    color: var(--muted);
+  }
+
+  .day-btn.active .day-count {
+    background: var(--gold);
+    color: #151210;
+  }
+
+  /* BLOCKS GRID */
+  .blocks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .block-card {
+    border-radius: 8px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border: 1px solid;
+  }
+
+  .block-card.presencial { background: #2a1e0e; border-color: #c49050; }
+  .block-card.pausa      { background: #142018; border-color: #7a9e7e; }
+  .block-card.virtual    { background: #101e2a; border-color: #6b8fa8; }
+  .block-card.creativo   { background: #201428; border-color: #9e7aaa; }
+
+  .block-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .block-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .presencial .block-dot { background: #b8945a; }
+  .pausa      .block-dot { background: #7a9e7e; }
+  .virtual    .block-dot { background: #6b8fa8; }
+  .creativo   .block-dot { background: #9e7aaa; }
+
+  .block-time {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .block-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .presencial .block-label { color: #b8945a; }
+  .pausa      .block-label { color: #7a9e7e; }
+  .virtual    .block-label { color: #6b8fa8; }
+  .creativo   .block-label { color: #9e7aaa; }
+
+  /* TASK LIST */
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 36px;
+  }
+
+  .task-empty {
+    font-size: 12px;
+    color: #b0a090;
+    font-style: italic;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .task-item input[type="checkbox"] {
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+  }
+
+  .task-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text);
+    transition: opacity 0.2s;
+  }
+
+  .task-text.done {
+    text-decoration: line-through;
+    opacity: 0.4;
+  }
+
+  .task-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #c0b0a0;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .task-del:hover { color: #d07070; }
+
+  /* ADD TASK */
+  .add-task {
+    display: flex;
+    gap: 6px;
+  }
+
+  .add-task input {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.05);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .add-task input:focus { border-color: var(--gold); }
+
+  .add-task button {
+    padding: 7px 13px;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .add-task button:hover { opacity: 0.85; }
+  .presencial .add-task button { background: #b8945a; }
+  .pausa      .add-task button { background: #7a9e7e; }
+  .virtual    .add-task button { background: #6b8fa8; }
+  .creativo   .add-task button { background: #9e7aaa; }
+
+  /* NOTAS RÁPIDAS DEL DÍA (inline en pestaña Semana) */
+.daynotes-section {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 18px 20px;
+}
+
+.daynotes-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.daynotes-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.daynotes-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 400;
+}
+
+.daynotes-input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.daynotes-input-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.daynotes-input-row input:focus { border-color: var(--gold); }
+.daynotes-input-row input::placeholder { color: var(--muted); font-style: italic; }
+
+.daynotes-input-row button {
+  padding: 8px 14px;
+  border-radius: 4px;
+  border: none;
+  background: var(--gold-light);
+  color: var(--gold);
+  font-size: 16px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.15s;
+}
+
+.daynotes-input-row button:hover { opacity: 0.8; }
+
+.daynote-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.daynote-item:last-child { border-bottom: none; }
+
+.daynote-bullet {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.daynote-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.daynote-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.daynote-time {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.daynote-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.daynote-del:hover { color: #d07070; }
+
+.daynotes-empty {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+  
+  <!-- NOTAS RÁPIDAS DEL DÍA -->
+<div class="daynotes-section">
+  <div class="daynotes-header">
+    <div class="daynotes-dot"></div>
+    <div class="daynotes-title">Notas rápidas del día</div>
+  </div>
+  <div class="daynotes-input-row">
+    <input type="text" id="daynote-input"
+      placeholder="Apunta algo para hoy..."
+      onkeydown="if(event.key==='Enter') addDaynote()">
+    <button onclick="addDaynote()">+</button>
+  </div>
+  <div id="daynotes-list"></div>
+</div>
+  
+  /* WEEKEND BANNER */
+  .weekend-banner {
+    margin-top: 20px;
+    padding: 12px 18px;
+    background: var(--dark);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .weekend-banner span {
+    font-size: 12px;
+    color: #c8b89a;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* CAPTURE TAB */
+  .capture-wrap { max-width: 540px; }
+
+  .capture-intro {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+
+  .capture-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .capture-input-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+  }
+
+  .capture-input-row input:focus { border-color: var(--gold); }
+
+  .capture-input-row button {
+    padding: 10px 18px;
+    border-radius: 4px;
+    background: var(--dark);
+    border: none;
+    color: var(--gold);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+
+  .capture-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .capture-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: opacity 0.2s;
+  }
+
+  .capture-item input[type="checkbox"] {
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .capture-item-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .capture-item-text.done {
+    text-decoration: line-through;
+    opacity: 0.4;
+  }
+
+  .capture-empty {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    padding: 12px 0;
+  }
+
+  /* CLOSURE TAB */
+  .closure-wrap { max-width: 540px; }
+
+  .closure-intro {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 24px;
+    line-height: 1.7;
+  }
+
+  .closure-question {
+    margin-bottom: 20px;
+  }
+
+  .closure-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .closure-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .closure-question textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+
+  .closure-question textarea:focus { border-color: var(--gold); }
+
+  .closure-clear {
+    padding: 9px 20px;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 4px;
+    transition: all 0.15s;
+  }
+
+  .closure-clear:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+
+  /* NOTES SECTION */
+  .notes-section {
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .notes-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--dark);
+  }
+
+  .notes-header-icon {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .notes-header-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  .notes-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .notes-col {
+    padding: 18px 20px;
+  }
+
+  .notes-col:first-child {
+    border-right: 1px solid var(--border);
+  }
+
+  .notes-col-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-weight: 400;
+  }
+
+  .notes-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.03);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+    line-height: 1.7;
+    transition: border-color 0.15s;
+  }
+
+  .notes-textarea:focus { border-color: var(--gold); }
+  .notes-textarea::placeholder { color: var(--muted); font-style: italic; }
+
+  .ideas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+    min-height: 20px;
+  }
+
+  .idea-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .idea-bullet {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .idea-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .idea-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1;
+    padding: 0 2px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .idea-del:hover { color: #d07070; }
+
+  .ideas-add-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .ideas-add-row input {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.03);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .ideas-add-row input:focus { border-color: var(--gold); }
+  .ideas-add-row input::placeholder { color: var(--muted); font-style: italic; }
+
+  .ideas-add-row button {
+    padding: 7px 13px;
+    border-radius: 4px;
+    border: none;
+    background: var(--gold-light);
+    color: var(--gold);
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.15s;
+  }
+
+  .ideas-add-row button:hover { opacity: 0.8; }
+
+  @media (max-width: 640px) {
+    .notes-body { grid-template-columns: 1fr; }
+    .notes-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* NOTAS RÁPIDAS TAB */
+  .quicknotes-wrap {
+    max-width: 720px;
+  }
+
+  .quicknotes-intro {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 24px;
+    line-height: 1.7;
+  }
+
+  .quicknotes-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .quicknotes-input-row input {
+    flex: 1;
+    padding: 11px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .quicknotes-input-row input:focus { border-color: var(--gold); }
+  .quicknotes-input-row input::placeholder { color: var(--muted); font-style: italic; }
+
+  .quicknotes-input-row button {
+    padding: 11px 20px;
+    border-radius: 4px;
+    background: var(--gold);
+    border: none;
+    color: var(--dark);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  .quicknotes-input-row button:hover { opacity: 0.85; }
+
+  .quicknote-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+
+  .quicknote-item:hover { border-color: #4a4038; }
+
+  .quicknote-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .quicknote-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .quicknote-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .quicknote-date {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .quicknote-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .quicknote-del:hover { color: #d07070; }
+
+  .quicknotes-empty {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    padding: 12px 0;
+  }
+
+  .quicknotes-clear {
+    margin-top: 20px;
+    padding: 9px 20px;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .quicknotes-clear:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+
+  /* HIDDEN */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (max-width: 640px) {
+    header { padding: 20px; }
+    main { padding: 20px; }
+    .blocks-grid { grid-template-columns: 1fr; }
+    .header-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-sub">Wikimedia Chile · Planificador</div>
+    <div class="header-title">Mi semana</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('semana', this)">Semana</button>
+    <button class="tab" onclick="switchTab('captura', this)">Captura <span id="capture-count"></span></button>
+    <button class="tab" onclick="switchTab('cierre', this)">Cierre semanal</button>
+    <button class="tab" onclick="switchTab('notas', this)">Notas rápidas <span id="quicknotes-count"></span></button>
+  </div>
+</header>
+
+<main>
+
+  <!-- SEMANA -->
+  <div id="tab-semana" class="tab-content active">
+    <div class="day-selector" id="day-selector"></div>
+    <div class="blocks-grid" id="blocks-grid"></div>
+
+    <div class="notes-section">
+      <div class="notes-header">
+        <div class="notes-header-icon"></div>
+        <div class="notes-header-title">Ideas y notas del día</div>
+      </div>
+      <div class="notes-body">
+        <div class="notes-col">
+          <div class="notes-col-label">Notas</div>
+          <textarea class="notes-textarea" id="notes-textarea" rows="5"
+            placeholder="Reflexiones, contexto, observaciones para el día..."
+            oninput="saveNotes()"></textarea>
+        </div>
+        <div class="notes-col">
+          <div class="notes-col-label">Ideas rápidas</div>
+          <div class="ideas-list" id="ideas-list"></div>
+          <div class="ideas-add-row">
+            <input type="text" id="idea-input" placeholder="Apuntar una idea..."
+              onkeydown="if(event.key==='Enter') addIdea()">
+            <button onclick="addIdea()">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="weekend-banner">
+      <span>🌿</span>
+      <span>El fin de semana es sagrado. Si algo urgente aparece, va a Captura — no lo procesas hasta el lunes.</span>
+    </div>
+  </div>
+
+  <!-- CAPTURA -->
+  <div id="tab-captura" class="tab-content">
+    <div class="capture-wrap">
+      <p class="capture-intro">Ideas, pendientes y cosas que aparecen fuera de horario. No las proceses ahora — solo captúralas.</p>
+      <div class="capture-input-row">
+        <input type="text" id="capture-input" placeholder="¿Qué necesitas no olvidar?" onkeydown="if(event.key==='Enter') addCapture()">
+        <button onclick="addCapture()">Capturar</button>
+      </div>
+      <div class="capture-list" id="capture-list"></div>
+    </div>
+  </div>
+
+  <!-- CIERRE -->
+  <div id="tab-cierre" class="tab-content">
+    <div class="closure-wrap">
+      <p class="closure-intro">Viernes 18:00 · 10 minutos. Tres preguntas, sin elaborar demasiado.</p>
+
+      <div class="closure-question">
+        <div class="closure-label">
+          <div class="closure-dot" style="background:#b8945a"></div>
+          ¿Qué quedó pendiente en lo operativo esta semana?
+        </div>
+        <textarea id="closure-operativo" rows="3" placeholder="Correos sin responder, entregas postergadas, coordinaciones abiertas..." oninput="saveClosure()"></textarea>
+      </div>
+
+      <div class="closure-question">
+        <div class="closure-label">
+          <div class="closure-dot" style="background:#9e7aaa"></div>
+          ¿Cómo está el cuento esta semana?
+        </div>
+        <textarea id="closure-creativo" rows="3" placeholder="¿Avancé? ¿Qué necesita? ¿Hay algo que quiero explorar la próxima semana?" oninput="saveClosure()"></textarea>
+      </div>
+
+      <div class="closure-question">
+        <div class="closure-label">
+          <div class="closure-dot" style="background:#6b8fa8"></div>
+          ¿Qué tiene fecha la semana que viene?
+        </div>
+        <textarea id="closure-proxima" rows="3" placeholder="Reuniones, entregas, eventos, compromisos..." oninput="saveClosure()"></textarea>
+      </div>
+
+      <button class="closure-clear" onclick="clearClosure()">Limpiar para la próxima semana</button>
+    </div>
+  </div>
+
+  <!-- NOTAS RÁPIDAS -->
+  <div id="tab-notas" class="tab-content">
+    <div class="quicknotes-wrap">
+      <p class="quicknotes-intro">Anota lo que aparece en cualquier momento. Se guarda aquí, en este navegador.</p>
+      <div class="quicknotes-input-row">
+        <input type="text" id="quicknote-input" placeholder="Escribe tu nota y presiona Enter..."
+          onkeydown="if(event.key==='Enter') addQuicknote()">
+        <button onclick="addQuicknote()">Publicar</button>
+      </div>
+      <div id="quicknotes-list"></div>
+      <button class="quicknotes-clear" onclick="clearQuicknotes()">Borrar todas las notas</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+  const BLOCKS = [
+    { id:'presencial', label:'9:30 – 13:30', sub:'Presencial · Operativo', cls:'presencial' },
+    { id:'pausa',      label:'13:30 – 15:00', sub:'Pausa',                  cls:'pausa' },
+    { id:'virtual',    label:'15:00 – 18:00', sub:'Virtual · Enfocado',     cls:'virtual' },
+    { id:'creativo',   label:'Noche',          sub:'Escritura creativa',     cls:'creativo' },
+  ];
+
+  let activeDay = DAYS[0];
+  let state = load();
+
+  function load() {
+    try {
+      const raw = localStorage.getItem('planificador-michelle');
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    // default state
+    const tasks = {};
+    DAYS.forEach(d => {
+      tasks[d] = {};
+      BLOCKS.forEach(b => { tasks[d][b.id] = []; });
+    });
+    return {
+      tasks,
+      capture: [],
+      closure: { operativo:'', creativo:'', proxima:'' },
+      notes: {},
+      ideas: {},
+      quicknotes: [],
+      nextId: 1,
+    };
+  }
+
+  function save() {
+    localStorage.setItem('planificador-michelle', JSON.stringify(state));
+  }
+
+  // ── TABS ──────────────────────────────────────────
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── DAY SELECTOR ──────────────────────────────────
+  function renderDaySelector() {
+    const container = document.getElementById('day-selector');
+    container.innerHTML = '';
+    DAYS.forEach(day => {
+      const total = BLOCKS.reduce((s, b) => s + (state.tasks[day][b.id]?.length || 0), 0);
+      const btn = document.createElement('button');
+      btn.className = 'day-btn' + (day === activeDay ? ' active' : '');
+      btn.innerHTML = day + (total > 0 ? ` <span class="day-count">${total}</span>` : '');
+      btn.onclick = () => { activeDay = day; render(); };
+      container.appendChild(btn);
+    });
+  }
+
+  // ── BLOCKS ────────────────────────────────────────
+  function renderBlocks() {
+    const grid = document.getElementById('blocks-grid');
+    grid.innerHTML = '';
+    BLOCKS.forEach(block => {
+      const tasks = state.tasks[activeDay][block.id] || [];
+      const card = document.createElement('div');
+      card.className = `block-card ${block.cls}`;
+      card.innerHTML = `
+        <div class="block-header">
+          <div class="block-dot"></div>
+          <div>
+            <div class="block-time">${block.label}</div>
+            <div class="block-label">${block.sub}</div>
+          </div>
+        </div>
+        <div class="task-list" id="tasks-${block.id}">
+          ${tasks.length === 0 ? '<div class="task-empty">Sin tareas aún</div>' : ''}
+          ${tasks.map(t => taskHTML(t, block.id)).join('')}
+        </div>
+        <div class="add-task">
+          <input type="text" id="input-${block.id}" placeholder="Agregar tarea..."
+            onkeydown="if(event.key==='Enter') addTask('${block.id}')">
+          <button onclick="addTask('${block.id}')">+</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function taskHTML(task, blockId) {
+    return `
+      <div class="task-item" id="task-${task.id}">
+        <input type="checkbox" ${task.done ? 'checked' : ''}
+          onchange="toggleTask('${blockId}', ${task.id})">
+        <span class="task-text ${task.done ? 'done' : ''}">${escHtml(task.text)}</span>
+        <button class="task-del" onclick="removeTask('${blockId}', ${task.id})">×</button>
+      </div>
+    `;
+  }
+
+  function addTask(blockId) {
+    const input = document.getElementById('input-' + blockId);
+    const text = input.value.trim();
+    if (!text) return;
+    state.tasks[activeDay][blockId].push({ id: state.nextId++, text, done: false });
+    input.value = '';
+    save();
+    render();
+  }
+
+  function toggleTask(blockId, id) {
+    const t = state.tasks[activeDay][blockId].find(t => t.id === id);
+    if (t) t.done = !t.done;
+    save();
+    renderBlocks();
+  }
+
+  function removeTask(blockId, id) {
+    state.tasks[activeDay][blockId] = state.tasks[activeDay][blockId].filter(t => t.id !== id);
+    save();
+    render();
+  }
+
+  // ── CAPTURE ───────────────────────────────────────
+  function renderCapture() {
+    const list = document.getElementById('capture-list');
+    const count = document.getElementById('capture-count');
+    const active = state.capture.filter(c => !c.done);
+    count.textContent = active.length > 0 ? `(${active.length})` : '';
+
+    if (state.capture.length === 0) {
+      list.innerHTML = '<div class="capture-empty">La bandeja está vacía.</div>';
+      return;
+    }
+    list.innerHTML = state.capture.map(c => `
+      <div class="capture-item">
+        <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleCapture(${c.id})">
+        <span class="capture-item-text ${c.done ? 'done' : ''}">${escHtml(c.text)}</span>
+        <button class="task-del" onclick="removeCapture(${c.id})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function addCapture() {
+    const input = document.getElementById('capture-input');
+    const text = input.value.trim();
+    if (!text) return;
+    state.capture.push({ id: state.nextId++, text, done: false });
+    input.value = '';
+    save();
+    renderCapture();
+  }
+
+  function toggleCapture(id) {
+    const c = state.capture.find(c => c.id === id);
+    if (c) c.done = !c.done;
+    save();
+    renderCapture();
+  }
+
+  function removeCapture(id) {
+    state.capture = state.capture.filter(c => c.id !== id);
+    save();
+    renderCapture();
+  }
+
+  // ── CLOSURE ───────────────────────────────────────
+  function renderClosure() {
+    document.getElementById('closure-operativo').value = state.closure.operativo || '';
+    document.getElementById('closure-creativo').value  = state.closure.creativo  || '';
+    document.getElementById('closure-proxima').value   = state.closure.proxima   || '';
+  }
+
+  function saveClosure() {
+    state.closure.operativo = document.getElementById('closure-operativo').value;
+    state.closure.creativo  = document.getElementById('closure-creativo').value;
+    state.closure.proxima   = document.getElementById('closure-proxima').value;
+    save();
+  }
+
+  function clearClosure() {
+    if (!confirm('¿Limpiar el cierre semanal para empezar de nuevo?')) return;
+    state.closure = { operativo:'', creativo:'', proxima:'' };
+    save();
+    renderClosure();
+  }
+
+  // ── NOTES & IDEAS ────────────────────────────────
+  function renderNotes() {
+    const textarea = document.getElementById('notes-textarea');
+    const list = document.getElementById('ideas-list');
+    if (!textarea || !list) return;
+
+    textarea.value = state.notes[activeDay] || '';
+
+    const ideas = state.ideas[activeDay] || [];
+    if (ideas.length === 0) {
+      list.innerHTML = '';
+      return;
+    }
+    list.innerHTML = ideas.map(idea => `
+      <div class="idea-item" id="idea-${idea.id}">
+        <div class="idea-bullet"></div>
+        <span class="idea-text">${escHtml(idea.text)}</span>
+        <button class="idea-del" onclick="removeIdea(${idea.id})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function saveNotes() {
+    state.notes[activeDay] = document.getElementById('notes-textarea').value;
+    save();
+  }
+
+  function addIdea() {
+    const input = document.getElementById('idea-input');
+    const text = input.value.trim();
+    if (!text) return;
+    if (!state.ideas[activeDay]) state.ideas[activeDay] = [];
+    state.ideas[activeDay].push({ id: state.nextId++, text });
+    input.value = '';
+    save();
+    renderNotes();
+  }
+
+  function removeIdea(id) {
+    if (!state.ideas[activeDay]) return;
+    state.ideas[activeDay] = state.ideas[activeDay].filter(i => i.id !== id);
+    save();
+    renderNotes();
+  }
+
+  // ── DAY NOTES ─────────────────────────────────────
+function renderDaynotes() {
+  const list = document.getElementById('daynotes-list');
+  if (!list) return;
+  if (!state.daynotes) state.daynotes = {};
+  const notes = state.daynotes[activeDay] || [];
+  if (notes.length === 0) {
+    list.innerHTML = '<div class="daynotes-empty">Sin notas para hoy.</div>';
+    return;
+  }
+  list.innerHTML = [...notes].reverse().map(n => `
+    <div class="daynote-item">
+      <div class="daynote-bullet"></div>
+      <div class="daynote-content">
+        <div class="daynote-text">${escHtml(n.text)}</div>
+        <div class="daynote-time">${n.time}</div>
+      </div>
+      <button class="daynote-del" onclick="removeDaynote(${n.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function addDaynote() {
+  const input = document.getElementById('daynote-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!state.daynotes) state.daynotes = {};
+  if (!state.daynotes[activeDay]) state.daynotes[activeDay] = [];
+  const now = new Date();
+  const time = now.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
+  state.daynotes[activeDay].push({ id: state.nextId++, text, time });
+  input.value = '';
+  save();
+  renderDaynotes();
+}
+
+function removeDaynote(id) {
+  if (!state.daynotes || !state.daynotes[activeDay]) return;
+  state.daynotes[activeDay] = state.daynotes[activeDay].filter(n => n.id !== id);
+  save();
+  renderDaynotes();
+}
+
+  // ── QUICK NOTES ───────────────────────────────────
+  function renderQuicknotes() {
+    function render() {
+  renderDaySelector();
+  renderBlocks();
+  renderNotes();
+  renderCapture();
+  renderClosure();
+  renderQuicknotes();
+  renderDaynotes();
+}
+    const list = document.getElementById('quicknotes-list');
+    const count = document.getElementById('quicknotes-count');
+    if (!list) return;
+
+    const notes = state.quicknotes || [];
+    count.textContent = notes.length > 0 ? `(${notes.length})` : '';
+
+    if (notes.length === 0) {
+      list.innerHTML = '<div class="quicknotes-empty">Aún no hay notas. ¡Escribe la primera!</div>';
+      return;
+    }
+
+    // Mostrar las más recientes primero
+    list.innerHTML = [...notes].reverse().map(n => `
+      <div class="quicknote-item">
+        <div class="quicknote-dot"></div>
+        <div class="quicknote-content">
+          <div class="quicknote-text">${escHtml(n.text)}</div>
+          <div class="quicknote-date">${n.date}</div>
+        </div>
+        <button class="quicknote-del" onclick="removeQuicknote(${n.id})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function addQuicknote() {
+    const input = document.getElementById('quicknote-input');
+    const text = input.value.trim();
+    if (!text) return;
+    if (!state.quicknotes) state.quicknotes = [];
+
+    const now = new Date();
+    const date = now.toLocaleDateString('es-CL', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+
+    state.quicknotes.push({ id: state.nextId++, text, date });
+    input.value = '';
+    save();
+    renderQuicknotes();
+  }
+
+  function removeQuicknote(id) {
+    state.quicknotes = state.quicknotes.filter(n => n.id !== id);
+    save();
+    renderQuicknotes();
+  }
+
+  function clearQuicknotes() {
+    if (!confirm('¿Borrar todas las notas rápidas?')) return;
+    state.quicknotes = [];
+    save();
+    renderQuicknotes();
+  }
+
+  // ── UTILS ─────────────────────────────────────────
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function render() {
+    renderDaySelector();
+    renderBlocks();
+    renderNotes();
+    renderCapture();
+    renderClosure();
+    renderQuicknotes();
+  }
+
+  render();
+</script>
+</body>
+</html>
